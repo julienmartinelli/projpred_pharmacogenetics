@@ -6,18 +6,21 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(parallel)
+library(glue)
 source("stanTools.R")
 source("functions.R")
 library(reshape2)
 rstan_options(auto_write = TRUE)
 set.seed(11191951)
 
+options <- commandArgs(trailingOnly = TRUE)
+pathfolder = glue("output_backatit_{options[1]}_{options[2]}")
 runStan <- TRUE
 modelName <- "Simu"
-namedir <- "/output_globlasso_corrected"
-savefile <- "StanFit_globlasso.Rsave"
-# modelfile <- "horseshoe.stan"
-modelfile <- "global_local_laplace.stan"
+namedir <- pathfolder
+savefile <- "StanFit_horseshoe.Rsave"
+modelfile <- "horseshoe.stan"
+# modelfile <- "global_local_laplace.stan"
 projectDir <- getwd()
 figDir <- tabDir <- outDir <- paste(projectDir, namedir, sep = "")
 dir.create(file.path(projectDir, namedir), showWarnings = FALSE)
@@ -27,7 +30,8 @@ dir.create(file.path(figDir, "/cond"), showWarnings = FALSE)
 dir.create(file.path(figDir, "/pred"), showWarnings = FALSE)
 
 #load the data set
-datainf <- read.csv('simu1_corrected.csv',header=TRUE)
+path <- glue("{projectDir}/SimulationSNPenvoi/{options[1]}/DATA/simu{options[2]}.csv")
+datainf <- read.csv(path,header=TRUE)
 
 #pk data only and removing na
 xdata <- datainf %>%
