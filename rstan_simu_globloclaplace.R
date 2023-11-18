@@ -14,13 +14,13 @@ rstan_options(auto_write = TRUE)
 set.seed(11191951)
 
 options <- commandArgs(trailingOnly = TRUE)
-pathfolder = glue("/output_backatit_{options[1]}_{options[2]}")
+pathfolder = glue("/output_globloclaplace_{options[1]}_{options[2]}")
 runStan <- TRUE
 modelName <- "Simu"
 namedir <- pathfolder
-savefile <- "StanFit_horseshoe.Rsave"
-modelfile <- "horseshoe.stan"
-# modelfile <- "global_local_laplace.stan"
+savefile <- "StanFit_globloclaplace.Rsave"
+#modelfile <- "horseshoe.stan"
+modelfile <- "global_local_laplace.stan"
 projectDir <- getwd()
 figDir <- tabDir <- outDir <- paste(projectDir, namedir, sep = "")
 dir.create(file.path(projectDir, namedir), showWarnings = FALSE)
@@ -58,12 +58,8 @@ data <- list(
   cObs=datainf$dv,
   dose= 200,
   nSNP=dim(tabSNP)[2], #number of tested SNPs
-  tabSNP=tabSNP, #array of SNPs
-  scale_global=scale_global,
-  nu_global=10,
-  nu_local=5,
-  slab_scale=10,
-  slab_df=5
+  tabSNP=tabSNP #array of SNPs
+
 )
 
 nChains <- 8
@@ -138,7 +134,7 @@ pdf(file = file.path(pkdir, paste(modelName, "pkparams_plots%03d.pdf", sep = "")
 ################################################################################################
 ### Posterior distributions of parameters
 
- mcmcDensity(fit, pars=c("kaHat", "CLHat", "V1Hat",
+mcmcDensity(fit, pars=c("kaHat", "CLHat", "V1Hat",
                          "omegaka", "omegaCL", "omegaV1","sigma1", "tau"),
                           byChain = TRUE)
 #mcmcDensity(fit, pars=c("kaHat", "CLHat", "V1Hat",

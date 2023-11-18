@@ -14,13 +14,13 @@ rstan_options(auto_write = TRUE)
 set.seed(11191951)
 
 options <- commandArgs(trailingOnly = TRUE)
-pathfolder = glue("/output_backatit_{options[1]}_{options[2]}")
+pathfolder = glue("/output_laplace_{options[1]}_{options[2]}")
 runStan <- TRUE
 modelName <- "Simu"
 namedir <- pathfolder
-savefile <- "StanFit_horseshoe.Rsave"
-modelfile <- "horseshoe.stan"
-# modelfile <- "global_local_laplace.stan"
+savefile <- "StanFit_laplace.Rsave"
+#modelfile <- "horseshoe.stan"
+modelfile <- "one_comp_ka_CLV_LaplacePriorOnbeta.stan"
 projectDir <- getwd()
 figDir <- tabDir <- outDir <- paste(projectDir, namedir, sep = "")
 dir.create(file.path(projectDir, namedir), showWarnings = FALSE)
@@ -58,12 +58,8 @@ data <- list(
   cObs=datainf$dv,
   dose= 200,
   nSNP=dim(tabSNP)[2], #number of tested SNPs
-  tabSNP=tabSNP, #array of SNPs
-  scale_global=scale_global,
-  nu_global=10,
-  nu_local=5,
-  slab_scale=10,
-  slab_df=5
+  tabSNP=tabSNP #array of SNPs
+
 )
 
 nChains <- 8
@@ -85,11 +81,11 @@ init <- function(){
        etaka = rep(0,n.ind),
        etaCL = rep(0,n.ind),
        etaV1 = rep(0,n.ind),
-       #lambda=3,
+       lambda=3,
        #beta=rep(0,data["nSNP"])
-       lambda_square=rep(1, data["nSNP"]),
-       beta=rep(0,data["nSNP"]),
-       z = rep(0, dim(tabSNP)[2])
+       #lambda_square=rep(1, data["nSNP"]),
+       beta=rep(0,data["nSNP"])
+       #z = rep(0, dim(tabSNP)[2])
   )
 }
 
@@ -101,7 +97,7 @@ init <- function(){
 
 parametersToPlot <- c("kaHat", "CLHat", "V1Hat",
                       "omegaka", "omegaCL", "omegaV1", "sigma1",
-                      "beta", "tau")
+                      "beta","lambda")
 
 
 ## Additional variables to monitor
@@ -138,14 +134,14 @@ pdf(file = file.path(pkdir, paste(modelName, "pkparams_plots%03d.pdf", sep = "")
 ################################################################################################
 ### Posterior distributions of parameters
 
- mcmcDensity(fit, pars=c("kaHat", "CLHat", "V1Hat",
-                         "omegaka", "omegaCL", "omegaV1","sigma1", "tau"),
+mcmcDensity(fit, pars=c("kaHat", "CLHat", "V1Hat",
+                         "omegaka", "omegaCL", "omegaV1","sigma1","lambda"),
                           byChain = TRUE)
 #mcmcDensity(fit, pars=c("kaHat", "CLHat", "V1Hat",
 #                        "omegaka", "omegaCL", "omegaV1","sigma1"),#, "lambda"),
 #                         byChain = TRUE)
 pairs(fit, pars=c("kaHat", "CLHat", "V1Hat",
-                  "omegaka", "omegaCL", "omegaV1","sigma1", "tau")#, "lambda")
+                  "omegaka", "omegaCL", "omegaV1","sigma1", "lambda")
       )
 #pairs(fit, pars=c("kaHat", "CLHat", "V1Hat",
 #                  "omegaka", "omegaCL", "omegaV1","sigma1")#, "lambda")
